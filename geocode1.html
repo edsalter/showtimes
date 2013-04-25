@@ -1,0 +1,77 @@
+
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Geocoding</title>
+
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+    <script src="js/underscore.js"></script>
+
+    <script>
+        var geocoder;
+
+        function codeLatLng(position) {
+          geocoder = new google.maps.Geocoder();
+
+          var lat = parseFloat(position.coords.latitude);
+          var lng = parseFloat(position.coords.longitude);
+          var latlng = new google.maps.LatLng(lat, lng);
+
+          geocoder.geocode({'latLng': latlng}, function(results, status) {
+            if (status == google.maps.GeocoderStatus.OK) {
+              if (results[0]) {
+                var currentLocation = results[0];
+                
+                //var formatted_address = currentLocation.formatted_address;
+                var city = _.find(currentLocation.address_components, function(address){
+                  return address.types[0] == "locality"}
+                );
+
+                console.log(city.long_name);
+              } else {
+                alert('No results found');
+              }
+            } else {
+              alert('Geocoder failed due to: ' + status);
+            }
+          });
+        }
+
+        //display error passed back from browser geoloc
+        function displayError(e){
+            console.log(e);
+        }
+
+        //try and get our geocode
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            codeLatLng, 
+            displayError
+          );
+        }
+        else {
+          alert("Geolocation is not supported by this browser");
+        }
+
+
+
+
+    </script>
+    <style>
+
+    </style>
+
+  </head>
+  <body>
+    <div id="panel">
+      <input id="latlng" type="text" value="40.714224,-73.961452">
+      <input type="button" value="Reverse Geocode" onclick="codeLatLng()">
+    </div>
+    <div id="map-canvas"></div>
+  </body>
+</html>
+
