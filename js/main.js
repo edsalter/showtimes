@@ -17,7 +17,8 @@ function codeLatLng(position) {
           return address.types[0] == "locality"}
         );
 
-        jQuery("#latlng").val(city.long_name);
+        //jQuery("#latlng").val(city.long_name);
+        jQuery("#latlng").val(lat + "," + lng);
       } else {
         alert('No results found');
       }
