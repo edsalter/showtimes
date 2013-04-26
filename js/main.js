@@ -1,45 +1,48 @@
 var geocoder;
+var latitude;
+var longitude;
 
 function codeLatLng(position) {
-  geocoder = new google.maps.Geocoder();
+geocoder = new google.maps.Geocoder();
+	latitude = parseFloat(position.coords.latitude);
+	longitude = parseFloat(position.coords.longitude);  
 
-  var lat = parseFloat(position.coords.latitude);
-  var lng = parseFloat(position.coords.longitude);
-  var latlng = new google.maps.LatLng(lat, lng);
-
-  geocoder.geocode({'latLng': latlng}, function(results, status) {
-    if (status == google.maps.GeocoderStatus.OK) {
-      if (results[0]) {
-        var currentLocation = results[0];
-        
-        //var formatted_address = currentLocation.formatted_address;
-        var city = _.find(currentLocation.address_components, function(address){
-          return address.types[0] == "locality"}
-        );
-
-        //jQuery("#latlng").val(city.long_name);
-        jQuery("#latlng").val(lat + "," + lng);
-      } else {
-        alert('No results found');
-      }
-    } else {
-      alert('Geocoder failed due to: ' + status);
-    }
-  });
+	jQuery("#latlng").val(latitude + "," + longitude);
 }
 
 //display error passed back from browser geoloc
-function displayError(e){
-    console.log(e);
+function handle_error(e){
+	console.log(e);
+	console.log("could not use location");
 }
 
-//try and get our geocode
-if (navigator.geolocation) {
-  navigator.geolocation.getCurrentPosition(
-    codeLatLng, 
-    displayError
-  );
-}
-else {
-  alert("Geolocation is not supported by this browser");
-}
+
+
+jQuery(document).ready(function () {
+	//try and get our geocode
+	if (google.loader.ClientLocation) {
+		latitude = parseFloat(google.loader.ClientLocation.latitude);
+		longitude = parseFloat(google.loader.ClientLocation.longitude);
+	}
+
+	//we hopefully already have IP based location, but let's try and improve with proper geo location from user agent
+	if (navigator.geolocation) {
+		navigator.geolocation.getCurrentPosition(
+			codeLatLng, 
+			handle_error
+		);
+	}
+	else {
+		handle_error("Geolocation is not supported by this browser");
+	}
+
+	//final check to make sure we have values, else print error message
+	if(latitude && longitude){
+		jQuery("#latlng").val(latitude + "," + longitude);
+	}
+	else{
+		jQuery("#latlng").val("unable to get your location");
+	}
+
+});
+
